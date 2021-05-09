@@ -45,6 +45,7 @@ modapsclient = "*"
 pyqt5 = "*"
 ipykernel = "*"
 pyreadstat = "*"
+dask = "*"
 
 [dev-packages]
 autopep8 = "*"

@@ -65,23 +65,32 @@ def extract_district_voronoi(india_voronoi_gpd: gpd.geodataframe.GeoDataFrame, d
 # Join based method : less expensive as oppose to clip based method above.
 
 
-def extract_district_voronoi_wo_clipping(india_voronoi_gpd: gpd.geodataframe.GeoDataFrame, district_gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    district_voronoi_joined = gpd.sjoin(
-        india_voronoi_gpd, district_gdf, op='intersects')
-    return district_voronoi_joined
+def extract_region_voronoi_wo_clipping(country_voronoi_gpd: gpd.geodataframe.GeoDataFrame, region_gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Extracts the voronoids of a given region geodataframe. Here the region can be a district or state or country.
+
+    Args:
+        country_voronoi_gpd (gpd.geodataframe.GeoDataFrame): The weighted voronoi tessellation of a country
+        region_gdf (gpd.geodataframe.GeoDataFrame): The region to extracted from the voronoi tessellation. The region could be a district, state.
+
+    Returns:
+        gpd.geodataframe.GeoDataFrame: Returns the extracted voronoi geodataframe for a specified region.
+    """
+    region_voronoi_joined = gpd.sjoin(
+        country_voronoi_gpd, region_gdf, op='intersects')
+    return region_voronoi_joined
 
 
-def plot_district_voronoi(voronoi_gpd: gpd.geodataframe.GeoDataFrame, area_name: str):
+def plot_region_voronoi(voronoi_gpd: gpd.geodataframe.GeoDataFrame, region_name: str):
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     voronoi_gpd.plot(ax=ax)
-    ax.set_title("Voronoi tessellation of " + area_name)
+    ax.set_title("Voronoi tessellation of " + region_name)
     ax.set_axis_off()
     plt.axis('equal')
     plt.show()
 
 
-def write_district_voronoi_to_shapefile(district_voronoi_gpd: gpd.geodataframe.GeoDataFrame, filename: str):
+def write_region_voronoi_to_shapefile(region_voronoi_gpd: gpd.geodataframe.GeoDataFrame, filename: str):
     crs = {'init': 'epsg:4326'}
-    new_district_gpd = gpd.GeoDataFrame(
-        district_voronoi_gpd, geometry=district_voronoi_gpd.geometry, crs=crs)
-    district_voronoi_gpd.to_file(driver='ESRI Shapefile', filename=filename)
+    new_region_gpd = gpd.GeoDataFrame(
+        region_voronoi_gpd, geometry=region_voronoi_gpd.geometry, crs=crs)
+    region_voronoi_gpd.to_file(driver='ESRI Shapefile', filename=filename)

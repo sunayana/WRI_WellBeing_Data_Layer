@@ -29,6 +29,21 @@ def extract_district_dataframe(countryGDF: gpd.geodataframe.GeoDataFrame, distri
     return district_gdf
 
 
+def extract_state_dataframe(countryGDF: gpd.geodataframe.GeoDataFrame, state_name: str) -> gpd.geodataframe.GeoDataFrame:
+    """Extracts the geodataframe for a given state from the gadm level 1 shapefile of a country
+
+    Args:
+        countryGDF (gpd.geodataframe.GeoDataFrame): GeoDataFrame of the gadm36 level 1 shapefile of a country
+        state_name (str): Name of a state present in the country represented by countryGDF.
+
+    Returns:
+        gpd.geodataframe.GeoDataFrame: GeoDataFrame of the state as extracted from countryGDF
+    """
+    state_gdf = countryGDF[countryGDF['NAME_1'] == state_name]
+    state_gdf = state_gdf[['NAME_1', 'geometry']]
+    return state_gdf
+
+
 def district_extents(district_gdf: gpd.geodataframe.GeoDataFrame) -> Extents:
     """Computes the extents the bounding box of a given geo dataframe.
 
@@ -126,20 +141,23 @@ def create_knots_and_edges_from_boundary(district_voronoi_gdf: gpd.geodataframe.
         district_poly, truncate_by_edge=False, network_type='all', retain_all=True, )
     return (district_poly, district_graph)
 
+# TODO : rename the variable to extract voronoi_poly instead of district poly. Then we reduce computation time for merging.
+# TODO : We then only
 
-def extract_osm_csv(district_poly: Polygon, tags: dict = default_tags) -> pd.DataFrame:
-    """Given the geometry of a district polygon and a set of tags (for different ammenities), the method extracts 
+
+def extract_osm_csv(region_poly: Polygon, tags: dict = default_tags) -> pd.DataFrame:
+    """Given the geometry of a region polygon and a set of tags (for different ammenities), the method extracts 
     a pandas dataframe using OpenStreetMaps API. 
 
     Args:
-        district_poly (Polygon): Polygon geometry of a district
+        region_poly (Polygon): Polygon geometry of a voronoi region
         tags (dict, optional): Tags to be passed on the OSM API to extract relevant data for a district. Defaults to default_tags.
 
     Returns:
         pd.DataFrame: A pandas dataframe containing a list of ammenities and other features for a given district.
     """
-    district_osmdf = ox.geometries_from_polygon(district_poly, tags=tags)
-    return district_osmdf
+    region_osmdf = ox.geometries_from_polygon(region_poly, tags=tags)
+    return region_osmdf
 
 
 def plot_dhs_data(shapefile: str, dhs_cleanded_csv_file: str, figsize: int):
